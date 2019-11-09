@@ -1,0 +1,14 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: test-freemarker
+  freemarker:
+    cache: false
+    settings:
+      template_update_delay: 0 #检查模板更新延迟时间， 0 表示立即检查
+
+#  data:
+#    mongodb:
+#      uri: mongodb://root:123456@localhost:27017
+#      database: xc_cms
