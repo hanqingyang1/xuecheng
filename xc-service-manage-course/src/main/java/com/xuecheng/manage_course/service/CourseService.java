@@ -289,25 +289,22 @@ public class CourseService {
 
     //保存CoursePub
     public CoursePub saveCoursePub(String id, CoursePub coursePub){
-        if(StringUtils.isNotEmpty(id)){
-            ExceptionCast.cast(CourseCode.COURSE_PUBLISH_COURSEIDISNULL);
-        }
         CoursePub coursePubNew = null;
+        //根据课程id查询coursePub
         Optional<CoursePub> coursePubOptional = coursePubRepository.findById(id);
         if(coursePubOptional.isPresent()){
             coursePubNew = coursePubOptional.get();
-        }
-        if(coursePubNew == null){
+        }else{
             coursePubNew = new CoursePub();
         }
+
+        //将coursePub对象中的信息保存到coursePubNew中
         BeanUtils.copyProperties(coursePub,coursePubNew);
-        //设置主键
         coursePubNew.setId(id);
-        //更新时间戳为最新时间
+        //时间戳,给logstach使用
         coursePubNew.setTimestamp(new Date());
         //发布时间
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY‐MM‐dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
         String date = simpleDateFormat.format(new Date());
         coursePubNew.setPubTime(date);
         coursePubRepository.save(coursePubNew);
