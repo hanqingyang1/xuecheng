@@ -3,6 +3,13 @@ server:
 spring:
   application:
     name: xc-service-manage-media
+  #rabbitmq配置
+  rabbitmq:
+    host: 192.168.25.129
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
   data:
     mongodb:
       uri:  mongodb://root:123456@localhost:27017

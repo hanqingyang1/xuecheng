@@ -12,6 +12,21 @@
 
     <artifactId>xc-service-search</artifactId>
     <dependencies>
+        <!-- 导入Eureka服务的依赖 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <!--引入ribbon-->
+         <dependency>
+             <groupId>org.springframework.cloud</groupId>
+             <artifactId>spring-cloud-starter-ribbon</artifactId>
+         </dependency>
+        <!--引入feign-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.xuecheng</groupId>
             <artifactId>xc-framework-model</artifactId>

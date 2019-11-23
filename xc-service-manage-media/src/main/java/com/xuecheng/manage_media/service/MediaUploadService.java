@@ -10,6 +10,7 @@ import com.xuecheng.framework.model.response.CommonCode;
 import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_media.config.RabbitMQConfig;
 import com.xuecheng.manage_media.dao.MediaFileRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.amqp.AmqpException;
@@ -26,6 +27,7 @@ import java.util.*;
  * @author Administrator
  * @version 1.0
  **/
+@Slf4j
 @Service
 public class MediaUploadService {
     @Autowired
@@ -188,6 +190,7 @@ public class MediaUploadService {
         //状态为上传成功
         mediaFile.setFileStatus("301002");
         MediaFile save = mediaFileRepository.save(mediaFile);
+        sendProcessVideoMsg(mediaFile.getFileId());
         return new ResponseResult(CommonCode.SUCCESS);
     }
 
@@ -198,20 +201,22 @@ public class MediaUploadService {
      */
     public ResponseResult sendProcessVideoMsg(String mediaId){
 
-        //查询数据库mediaFile
+     //查询数据库mediaFile是否存在
         Optional<MediaFile> optional = mediaFileRepository.findById(mediaId);
         if(!optional.isPresent()){
             ExceptionCast.cast(CommonCode.FAIL);
         }
-        //构建消息内容
-        Map<String,String> map = new HashMap<>();
+        //封装消息体
+        Map<String,Object> map = new HashMap<>();
         map.put("mediaId",mediaId);
         String jsonString = JSON.toJSONString(map);
-        //向MQ发送视频处理消息
+
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfig.EX_MEDIA_PROCESSTASK,routingkey_media_video,jsonString);
-        } catch (AmqpException e) {
-            e.printStackTrace();
+            log.info("send media process task msg:{}",jsonString);
+
+        }catch (Exception e){
+            log.info("send media process task error,msg is:{},error:{}",jsonString,e.getMessage());
             return new ResponseResult(CommonCode.FAIL);
         }
 
