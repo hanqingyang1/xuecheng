@@ -6,6 +6,7 @@ import com.xuecheng.framework.client.XcServiceList;
 import com.xuecheng.framework.domain.ucenter.ext.AuthToken;
 import com.xuecheng.framework.domain.ucenter.response.AuthCode;
 import com.xuecheng.framework.exception.ExceptionCast;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -109,6 +110,16 @@ public class AuthService {
                 body.get("access_token") == null ||
                 body.get("refresh_token") == null ||
                 body.get("jti") == null){
+
+            //获取spring security返回的错误信息
+            String error_description = (String)body.get("error_description");
+            if(StringUtils.isNotEmpty(error_description)){
+                if(error_description.equals("坏的凭证")){
+                    ExceptionCast.cast(AuthCode.AUTH_CREDENTIAL_ERROR);
+                }else if(error_description.indexOf("UserDetailsService returned null")>=0){
+                    ExceptionCast.cast(AuthCode.AUTH_ACCOUNT_NOTEXISTS);
+                }
+            }
             ExceptionCast.cast(AuthCode.AUTH_LOGIN_APPLYTOKEN_FAIL);
         }
         AuthToken authToken = new AuthToken();
@@ -128,4 +139,21 @@ public class AuthService {
         return "Basic "+new String(encode);
     }
 
+    public AuthToken getUserToken(String token) {
+        String key = "user_token:"+token;
+        String string = stringRedisTemplate.opsForValue().get(key);
+        try {
+            AuthToken authToken = JSON.parseObject(string, AuthToken.class);
+            return authToken;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean delCookie(String token) {
+        String key = "user_token:"+token;
+        stringRedisTemplate.delete(key);
+        return true;
+    }
 }
