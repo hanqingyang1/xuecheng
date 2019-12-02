@@ -1,17 +1,22 @@
 package com.xuecheng.manage_course.service;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.prism.shader.Solid_TextureYV12_Loader;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.xuecheng.framework.domain.cms.CmsPage;
 import com.xuecheng.framework.domain.cms.response.CmsPageResult;
 import com.xuecheng.framework.domain.cms.response.CmsPostPageResult;
 import com.xuecheng.framework.domain.course.*;
+import com.xuecheng.framework.domain.course.ext.CourseInfo;
 import com.xuecheng.framework.domain.course.ext.CourseView;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
+import com.xuecheng.framework.domain.course.request.CourseListRequest;
 import com.xuecheng.framework.domain.course.response.CourseCode;
 import com.xuecheng.framework.domain.course.response.CoursePublishResult;
 import com.xuecheng.framework.exception.ExceptionCast;
 import com.xuecheng.framework.model.response.CommonCode;
+import com.xuecheng.framework.model.response.QueryResponseResult;
+import com.xuecheng.framework.model.response.QueryResult;
 import com.xuecheng.framework.model.response.ResponseResult;
 import com.xuecheng.manage_course.client.CmsPageClient;
 import com.xuecheng.manage_course.dao.*;
@@ -50,6 +55,8 @@ public class CourseService {
     TeachplanMediaRepository teachplanMediaRepository;
     @Autowired
     TeachplanMediaPubRepository teachplanMediaPubRepository;
+    @Autowired
+    CourseMapper courseMapper;
 
 
     @Value("${course‐publish.dataUrlPre}")
@@ -406,5 +413,29 @@ public class CourseService {
 
 
         return new ResponseResult(CommonCode.SUCCESS);
+    }
+
+    /**
+     * 根据comanyId查询课程列表
+     * @param companyId
+     * @param page
+     * @param size
+     * @param courseListRequest
+     * @return
+     */
+    public QueryResponseResult<CourseInfo> findCourseList(String companyId, int page, int size, CourseListRequest courseListRequest) {
+        if(courseListRequest==null){
+            courseListRequest = new CourseListRequest();
+        }
+        courseListRequest.setCompanyId(companyId);
+
+        PageHelper.startPage(page, size);
+        Page<CourseInfo> courseList = courseMapper.findCourseList(courseListRequest);
+        List<CourseInfo> list = courseList.getResult();
+        long total = courseList.getTotal();
+        QueryResult<CourseInfo> courseIncfoQueryResult = new QueryResult<CourseInfo>();
+        courseIncfoQueryResult.setList(list);
+        courseIncfoQueryResult.setTotal(total);
+        return new QueryResponseResult<>(CommonCode.SUCCESS,courseIncfoQueryResult);
     }
 }

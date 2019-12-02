@@ -16,7 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +50,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         XcUserExt userext = userClient.getUserext(username);
 //        userext.setUsername("itcast");
 //        userext.setPassword(new BCryptPasswordEncoder().encode("123"));
-        userext.setPermissions(new ArrayList<XcMenu>());
+//        userext.setPermissions(new ArrayList<XcMenu>());
         if(userext == null){
             //返回空给Spring Security 表示用户不存在
             return null;
@@ -60,6 +62,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         //用户权限，这里暂时使用静态数据，最终会从数据库读取
         //从数据库获取权限
         List<XcMenu> permissions = userext.getPermissions();
+        if(CollectionUtils.isEmpty(permissions)){
+            permissions = new ArrayList<>();
+        }
         List<String> user_permission = new ArrayList<>();
         permissions.forEach(item-> user_permission.add(item.getCode()));
 //        user_permission.add("course_get_baseinfo");

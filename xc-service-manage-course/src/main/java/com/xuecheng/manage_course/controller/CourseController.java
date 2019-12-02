@@ -4,17 +4,23 @@ import com.xuecheng.api.couse.CourseControllerApi;
 import com.xuecheng.framework.domain.course.CoursePic;
 import com.xuecheng.framework.domain.course.Teachplan;
 import com.xuecheng.framework.domain.course.TeachplanMedia;
+import com.xuecheng.framework.domain.course.ext.CourseInfo;
 import com.xuecheng.framework.domain.course.ext.CourseView;
 import com.xuecheng.framework.domain.course.ext.TeachplanNode;
+import com.xuecheng.framework.domain.course.request.CourseListRequest;
 import com.xuecheng.framework.domain.course.response.CoursePublishResult;
+import com.xuecheng.framework.model.response.QueryResponseResult;
+import com.xuecheng.framework.model.response.QueryResult;
 import com.xuecheng.framework.model.response.ResponseResult;
+import com.xuecheng.framework.utils.XcOauth2Util;
+import com.xuecheng.framework.web.BaseController;
 import com.xuecheng.manage_course.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/course")
-public class CourseController implements CourseControllerApi {
+public class CourseController extends BaseController implements CourseControllerApi {
 @Autowired
 CourseService courseService;
 
@@ -92,5 +98,17 @@ CourseService courseService;
     @PostMapping("/savemedia")
     public ResponseResult savemedia(@RequestBody TeachplanMedia teachplanMedia) {
         return courseService.savemedia(teachplanMedia);
+    }
+
+    @Override
+    @GetMapping("/coursebase/list/{page}/{size}")
+    public QueryResponseResult<CourseInfo> findCourseList(@PathVariable("page") int page,
+                                                          @PathVariable("size") int size,
+                                                          CourseListRequest courseListRequest) {
+        XcOauth2Util xcOauth2Util = new XcOauth2Util();
+        XcOauth2Util.UserJwt userJwt = xcOauth2Util.getUserJwtFromHeader(request);
+        //先使用静态数据测试
+        String companyId = userJwt.getCompanyId();
+        return courseService.findCourseList(companyId,page,size,courseListRequest);
     }
 }
